@@ -55,7 +55,7 @@
         0
       ],
       "parameters": {
-        "jsCode": "const rows = $input.all().map(i => i.json);\n\nif (!rows.length) {\n  return [];\n}\n\nconst rowLines = rows.map((row, idx) => {\n  const fields = Object.entries(row)\n    .map(([key, value]) => `- ${key}: ${value}`)\n    .join('\\n');\n  return `Row ${idx + 1}:\\n${fields}`;\n}).join('\\n\\n');\n\nconst subject = `Data Summary from Google Sheet (${rows.length} row${rows.length > 1 ? 's' : ''})`;\nconst body = `Hi,\\n\\nHere is the latest data from the sheet:\\n\\n${rowLines}\\n\\nRegards,\\nYour Automation Bot`;\n\nreturn [{ json: { subject, body } }];"
+        "jsCode": "const rows = $input.all().map(i => i.json);\n\nif (!rows.length) {\n  return [];\n}\n\nconst blocks = rows.map(row => {\n  return `- Name: ${row.Name || ''}\\n- Course: ${row.Course || ''}\\n- Status: ${row.Status || ''}`;\n}).join('\\n\\n');\n\nconst subject = 'Data Summary from Google Sheet';\nconst body = `Hi,\\n\\nHere is the latest data from the sheet:\\n\\n${blocks}\\n\\nRegards,\\nYour Automation Bot`;\n\nreturn [{ json: { subject, body } }];"
       }
     },
     {
@@ -74,7 +74,8 @@
         "sendTo": "vivek@digitalprocreators.com",
         "subject": "={{ $json.subject }}",
         "message": "={{ $json.body }}",
-        "options": {}
+        "options": {},
+        "emailType": "text"
       },
       "credentials": {
         "gmailOAuth2": {
@@ -128,7 +129,7 @@
     "saveDataSuccessExecution": "all",
     "executionOrder": "v1"
   },
-  "versionId": "954731a3-d6b6-4c84-a36e-924fd7c8e579",
+  "versionId": "53e78026-c0c1-4a15-bac1-2431f219ad51",
   "meta": {
     "instanceId": "fd5c85e9c6bfa85369ff0ee73f6360d5cd5db1e05adb5bef0711b69199b2207e"
   },
