@@ -1,0 +1,138 @@
+{
+  "name": "Sheets to Gmail Report",
+  "nodes": [
+    {
+      "id": "manual-trigger-1",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "sheets-get-1",
+      "name": "Get Rows",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "sheet",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1M4kYvJ2LpW1WJep9DYfEm_h4uOHrFxQqn27KmLeS58k"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Sheet1"
+        },
+        "options": {
+          "dataStructure": "object"
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7UVOxjsa14X1onvV",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "code-build-email-1",
+      "name": "Build Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(i => i.json);\n\nif (!rows.length) {\n  return [];\n}\n\nconst rowLines = rows.map((row, idx) => {\n  const fields = Object.entries(row)\n    .map(([key, value]) => `- ${key}: ${value}`)\n    .join('\\n');\n  return `Row ${idx + 1}:\\n${fields}`;\n}).join('\\n\\n');\n\nconst subject = `Data Summary from Google Sheet (${rows.length} row${rows.length > 1 ? 's' : ''})`;\nconst body = `Hi,\\n\\nHere is the latest data from the sheet:\\n\\n${rowLines}\\n\\nRegards,\\nYour Automation Bot`;\n\nreturn [{ json: { subject, body } }];"
+      }
+    },
+    {
+      "id": "gmail-send-1",
+      "name": "Send Email",
+      "webhookId": "1c876e73-6f81-4825-875e-a6ccafce203c",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "vivek@digitalprocreators.com",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {}
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2khFNbW5TM5vFfSF",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Rows": {
+      "main": [
+        [
+          {
+            "node": "Build Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Email": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Get Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "executionOrder": "v1"
+  },
+  "versionId": "954731a3-d6b6-4c84-a36e-924fd7c8e579",
+  "meta": {
+    "instanceId": "fd5c85e9c6bfa85369ff0ee73f6360d5cd5db1e05adb5bef0711b69199b2207e"
+  },
+  "nodeGroups": [],
+  "id": "3mgPow8yeeDgGpqV",
+  "tags": []
+}
